@@ -2,7 +2,6 @@ module Main where
 
 import Data.List.Split as S
 import Data.List as L
-import qualified MyLib (someFunc)
 
 parse :: String -> [[Int]]
 parse = map (map read . words) . S.splitOn "\n\n"

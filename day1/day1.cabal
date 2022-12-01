@@ -21,17 +21,6 @@ maintainer:         williamhenrichdue@gmail.com
 -- category:
 extra-source-files: CHANGELOG.md
 
-library
-    exposed-modules:  MyLib
-
-    -- Modules included in this library but not exported.
-    -- other-modules:
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-    build-depends:    base ^>=4.17.0.0, split ^>=0.2.3.5,
-    hs-source-dirs:   src
-    default-language: Haskell2010
 
 executable day1
     main-is:          Main.hs
@@ -42,8 +31,7 @@ executable day1
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
-        base ^>=4.17.0.0, split ^>=0.2.3.5,
-        day1
+        base ^>=4.17.0.0, split ^>=0.2.3.5
 
-    hs-source-dirs:   app
+    hs-source-dirs:   src
     default-language: Haskell2010
