@@ -1,5 +1,5 @@
 cabal-version:      2.4
-name:               day1
+name:               day01
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
@@ -12,7 +12,8 @@ version:            0.1.0.0
 -- bug-reports:
 
 -- The license under which the package is released.
--- license:
+license:            MIT
+license-file:       LICENSE
 author:             William Due
 maintainer:         williamhenrichdue@gmail.com
 
@@ -22,7 +23,7 @@ maintainer:         williamhenrichdue@gmail.com
 extra-source-files: CHANGELOG.md
 
 
-executable day1
+executable day01
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
