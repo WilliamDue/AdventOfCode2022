@@ -54,6 +54,6 @@ solve2 = sum . map (uncurry score) . map strategy2
 
 main :: IO ()
 main = do
-  str <- getContents
-  print . solve1 $ parse str
-  print . solve2 $ parse str
+    input <- parse <$> getContents
+    print $ solve1 input
+    print $ solve2 input

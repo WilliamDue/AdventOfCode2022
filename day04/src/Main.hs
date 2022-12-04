@@ -30,6 +30,6 @@ solve2 = length . filter (uncurry isOverlap)
 
 main :: IO ()
 main = do
-    contents <- getContents
-    print . solve1 $ parse contents
-    print . solve2 $ parse contents
+    input <- parse <$> getContents
+    print $ solve1 input
+    print $ solve2 input

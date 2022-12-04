@@ -1,6 +1,6 @@
 module Main where
 
-import qualified Data.Set as S
+import qualified Data.List as L
 import qualified Data.Char as C
 import Data.List.Split (chunksOf)
 
@@ -12,7 +12,7 @@ splitAtMid ls = (\(a, b) -> [a, b]) $ splitAt mid ls
     where mid = length ls `div` 2
 
 findDuplicateItem :: [String] -> Char
-findDuplicateItem = S.findMin . foldl1 S.intersection . map S.fromList
+findDuplicateItem = head . foldl1 L.intersect
 
 priority :: Char -> Int
 priority c
@@ -23,10 +23,11 @@ priority c
 solve1 :: [String] -> Int
 solve1 = sum . map (priority . findDuplicateItem . splitAtMid)
 
+solve2 :: [String] -> Int
 solve2 = sum . map (priority . findDuplicateItem) . chunksOf 3
 
 main :: IO ()
 main = do
-        contents <- getContents
-        print . solve1 $ parse contents
-        print . solve2 $ parse contents
+    input <- parse <$> getContents
+    print $ solve1 input
+    print $ solve2 input
