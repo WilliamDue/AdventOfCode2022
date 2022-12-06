@@ -13,4 +13,3 @@ main = do
     contents <- getContents
     print $ solve 4 contents
     print $ solve 14 contents
-
