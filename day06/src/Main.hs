@@ -2,11 +2,8 @@ module Main where
 
 import Data.List ( mapAccumL, nub )
 
-substrings :: Int -> [Char] -> [[Char]]
-substrings n = snd . mapAccumL (\a b -> (b:a, take n a)) ""
-
 solve :: Int -> [Char] -> Int
-solve n = length . takeWhile ((/=n) . length . nub) . substrings n
+solve n = length . takeWhile ((/=n) . length . nub) . snd . mapAccumL (\a b -> (b:a, take n a)) ""
 
 main :: IO ()
 main = do
