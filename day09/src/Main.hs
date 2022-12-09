@@ -17,20 +17,22 @@ moveHead (x, y) (L m) = [(x, y - n) | n <- [1..m]]
 moveHead (x, y) (U m) = [(x + n, y) | n <- [1..m]]
 moveHead (x, y) (D m) = [(x - n, y) | n <- [1..m]]
 
-movesHead :: (Int, Int) -> [Direction] -> [(Int, Int)]
-movesHead p = fst . mapAccumL (\a b -> (a ++ (moveHead (last a) b), a)) [p]
+directionToCoords :: [Direction] -> [(Int, Int)]
+directionToCoords = fst . mapAccumL (\a b -> (a ++ (moveHead (last a) b), a)) [(0, 0)]
 
-moveTail :: Int -> (Int, Int) -> (Int, Int) -> (Int, Int)
-moveTail n (x, y) (x', y') = if n < abs a || n < abs b then (x + signum a, y + signum b) else (x, y) 
+move :: (Int, Int) -> (Int, Int) -> (Int, Int)
+move (x, y) (x', y') = if 1 < abs a || 1 < abs b then (x + signum a, y + signum b) else (x, y) 
     where (a, b) = distance (x, y) (x', y')
 
-tailMove = scanl (moveTail 1) (0, 0) 
+moves :: [(Int, Int)] -> [(Int, Int)]
+moves = scanl move (0, 0) 
 
 solve1 :: [Direction] -> Int
-solve1 = length . nub . scanl (moveTail 1) (0, 0) . movesHead (0, 0)
+solve1 = length . nub . moves . directionToCoords
 
 solve2 :: [Direction] -> Int
-solve2 = length . nub . (!! 9) . iterate tailMove . movesHead (0, 0)
+solve2 = length . nub . (!! 9) . iterate moves . directionToCoords
+
 main :: IO ()
 main = do
     contents <- parse <$> getContents
