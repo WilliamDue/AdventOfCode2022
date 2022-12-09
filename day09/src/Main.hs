@@ -1,6 +1,6 @@
 module Main where
 
-import Data.List ( mapAccumL, nub )
+import Data.List ( mapAccumL, nub, iterate )
 import Data.Bifunctor (Bifunctor(bimap))
 
 data Direction = R Int | L Int | U Int | D Int deriving (Show, Read) 
@@ -20,14 +20,19 @@ moveHead (x, y) (D m) = [(x - n, y) | n <- [1..m]]
 movesHead :: (Int, Int) -> [Direction] -> [(Int, Int)]
 movesHead p = fst . mapAccumL (\a b -> (a ++ (moveHead (last a) b), a)) [p]
 
-moveTail :: (Int, Int) -> (Int, Int) -> (Int, Int)
-moveTail (x, y) (x', y') = if 1 < abs a || 1 < abs b then (x + signum a, y + signum b) else (x, y) 
+moveTail :: Int -> (Int, Int) -> (Int, Int) -> (Int, Int)
+moveTail n (x, y) (x', y') = if n < abs a || n < abs b then (x + signum a, y + signum b) else (x, y) 
     where (a, b) = distance (x, y) (x', y')
 
-solve1 :: [Direction] -> Int
-solve1 = length . nub . scanl moveTail (0, 0) . movesHead (0, 0)
+tailMove = scanl (moveTail 1) (0, 0) 
 
+solve1 :: [Direction] -> Int
+solve1 = length . nub . scanl (moveTail 1) (0, 0) . movesHead (0, 0)
+
+solve2 :: [Direction] -> Int
+solve2 = length . nub . (!! 9) . iterate tailMove . movesHead (0, 0)
 main :: IO ()
 main = do
     contents <- parse <$> getContents
     print $ solve1 contents
+    print $ solve2 contents
