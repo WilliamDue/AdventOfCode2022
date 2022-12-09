@@ -44,7 +44,8 @@ findVisibility arr = map fst
                         . mapAccumL (\a b -> (b:a, and $ map (compare' arr b) a)) [Nothing]
                         . map Just
 
-solve1 arr = nub 
+solve1 arr = length
+             . nub 
              . concat
              . concat
              $ map (map (findVisibility arr)) [left, right, top, bottom]
@@ -53,7 +54,22 @@ solve1 arr = nub
           top = colunms arr
           bottom = map reverse top
 
+
+takeWhile' :: (a -> Bool) -> [a] -> [a]
+takeWhile' f [] = []
+takeWhile' f (x:xs) = if f x then x : takeWhile' f xs else [x]
+
+findViews arr (x, y) = product $ map (length . takeWhile' ((<height) . (arr !))) [left, right, top, bottom]
+    where height = arr ! (x, y)
+          right = takeWhile (idxExist arr) [(x, y') | y' <- [(y + 1), (y + 2)..]]
+          left = takeWhile (idxExist arr) [(x, y') | y' <- [(y - 1), (y - 2)..]]
+          bottom = takeWhile (idxExist arr) [(x', y) | x' <- [(x + 1), (x + 2)..]]
+          top = takeWhile (idxExist arr) [(x', y) | x' <- [(x - 1), (x - 2)..]]
+
+solve2 arr = maximum . map (findViews arr) $ indices arr
+
 main :: IO ()
 main = do
     input <- parse <$> getContents
-    print . length $ solve1 input
+    print $ solve1 input
+    print $ solve2 input
