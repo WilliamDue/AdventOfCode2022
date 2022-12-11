@@ -83,8 +83,8 @@ solve2 :: [Command] -> String
 solve2 = unlines
          . map cyclesToLine
          . restClockCycle (map (40*) [0..])
-         . init
          . chunksOf 40
+         . init
          . preprocessCycles (0, 240)
          . execute
 
