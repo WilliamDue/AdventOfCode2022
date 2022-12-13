@@ -8,8 +8,10 @@ import Control.Applicative ((<|>))
 import qualified Data.Char as C
 import Data.Maybe ( catMaybes, fromJust ) 
 import Text.Read ( readMaybe ) 
+import Data.Bifunctor ( Bifunctor(second) )
 
-data NestedList a = List [NestedList a] | Elem a
+
+data NestedList a = List [NestedList a] | Elem a deriving (Eq)
 
 instance Show a => Show (NestedList a) where
     show (List ls) = "[" ++ (concat . L.intersperse "," $ map show ls) ++ "]"
@@ -43,8 +45,40 @@ parse = map (toTuple . map (fromJust . fst . head . R.readP_to_S parseLine) . li
     where toTuple [a, b] = (a, b)
           toTuple _ = error "Could not parse."
 
+compareLeft :: Ord a => NestedList a -> NestedList a -> Ordering
+compareLeft (List (x:xs)) (List (y:ys)) = compareLeft x y
+compareLeft (Elem a) (List (y:ys)) = compareLeft (Elem a) y
+compareLeft (List (x:xs)) (Elem b) = compareLeft x (Elem b)
+compareLeft (Elem a) (Elem b) = a `compare` b
+compareLeft (List []) (List []) = EQ
+compareLeft (List []) _ = LT
+compareLeft _ (List []) = GT
+
+removeLeft :: NestedList a -> NestedList a
+removeLeft (List ((Elem _):xs)) = List xs
+removeLeft (List ((List []):xs)) = List xs
+removeLeft (List []) = List []
+removeLeft (List (x:xs)) = List ((removeLeft x):xs)
+
+compareNestedList :: Ord a => NestedList a -> NestedList a -> Ordering
+compareNestedList a b
+    | ordering == EQ = compareNestedList (removeLeft a) (removeLeft b)
+    | otherwise = ordering
+    where ordering = compareLeft a b
+
+solve1 :: [(NestedList Int, NestedList Int)] -> Int
+solve1 = sum . map fst . filter ((==LT) . (uncurry compareNestedList) . snd) . zip [1..]
+
+solve2 :: [(NestedList Int, NestedList Int)] -> NestedList Int -> NestedList Int -> Int
+solve2 pairPackages a b = aIdx * bIdx
+    where packages = ([a, b]++) . (uncurry (++)) $ unzip pairPackages
+          sortedPackages = L.sortBy compareNestedList packages
+          aIdx = (1+) . fromJust $ L.findIndex (==a) sortedPackages
+          bIdx = (1+) . fromJust $ L.findIndex (==b) sortedPackages
+
 main :: IO ()
 main = do
     input <- parse <$> getContents
-    mapM_ print input
-
+    print $ solve1 input
+    print $ solve2 input (List [ List [Elem 2]]) (List [ List [Elem 6]])
+    
