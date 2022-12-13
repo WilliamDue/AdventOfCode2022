@@ -10,7 +10,6 @@ import Data.Maybe ( catMaybes, fromJust )
 import Text.Read ( readMaybe ) 
 import Data.Bifunctor ( Bifunctor(second) )
 
-
 data NestedList a = List [NestedList a] | Elem a deriving (Eq)
 
 instance Show a => Show (NestedList a) where
@@ -60,19 +59,19 @@ removeLeft (List ((List []):xs)) = List xs
 removeLeft (List []) = List []
 removeLeft (List (x:xs)) = List ((removeLeft x):xs)
 
-compareNestedList :: Ord a => NestedList a -> NestedList a -> Ordering
-compareNestedList a b
-    | ordering == EQ = compareNestedList (removeLeft a) (removeLeft b)
-    | otherwise = ordering
-    where ordering = compareLeft a b
+instance Ord a => Ord (NestedList a) where
+    a `compare` b
+        | ordering == EQ = (removeLeft a) `compare` (removeLeft b)
+        | otherwise = ordering
+        where ordering = compareLeft a b
 
 solve1 :: [(NestedList Int, NestedList Int)] -> Int
-solve1 = sum . map fst . filter ((==LT) . (uncurry compareNestedList) . snd) . zip [1..]
+solve1 = sum . map fst . filter ((==LT) . (uncurry compare) . snd) . zip [1..]
 
 solve2 :: [(NestedList Int, NestedList Int)] -> NestedList Int -> NestedList Int -> Int
 solve2 pairPackages a b = aIdx * bIdx
     where packages = ([a, b]++) . (uncurry (++)) $ unzip pairPackages
-          sortedPackages = L.sortBy compareNestedList packages
+          sortedPackages = L.sort packages
           aIdx = (1+) . fromJust $ L.findIndex (==a) sortedPackages
           bIdx = (1+) . fromJust $ L.findIndex (==b) sortedPackages
 
