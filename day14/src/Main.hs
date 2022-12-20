@@ -76,12 +76,14 @@ solve = length . init . iterateMove
 upgrade :: MapState -> MapState
 upgrade state = newArray A.// (A.assocs state) A.// floor
     where ((minX, minY), (maxX, maxY)) = A.bounds state
-          newBounds = ((minX - maxY - 2, minY), (maxX + maxY + 2, maxY + 2))
+          newBounds = ((minX - (maxY - minY) - 2, minY), (maxX + (maxY - minY) + 2, maxY + 2))
           newArray = A.array newBounds $ zip (A.range newBounds) (repeat '.')
           floor = [((x, snd $ snd newBounds), '#') | x <- [(fst $ fst newBounds)..(fst $ snd newBounds)]]
 
 main :: IO ()
 main = do
     input <- parse <$> getContents
+    -- printArray input
     print $ solve input
     print . (+1) . solve $ upgrade input
+
