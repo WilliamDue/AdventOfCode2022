@@ -25,29 +25,25 @@ parseLine str = Node { key = key', weight = weight', neighbours = neighbours', i
 parse :: String -> Graph
 parse = M.fromList . map ((\n -> (key n, n)) . parseLine) . lines
 
-bfs :: Graph -> String -> M.Map String Int
-bfs graph source = helper graph queue pathLength
+bfs :: Graph -> String -> Int -> M.Map String Int
+bfs graph source maxLength = helper graph queue pathLength maxLength
     where queue = [(source, 1)]
           pathLength = M.empty
-          helper :: Graph -> [(String, Int)] -> M.Map String Int -> M.Map String Int
-          helper graph' queue' pathLength' = result
-            where result = if null queue' then pathLength' else helper graph' queue'' pathLength''
-                  (pivot, weight) = head queue'
+          helper :: Graph -> [(String, Int)] -> M.Map String Int -> Int -> M.Map String Int
+          helper graph' queue' pathLength' maxLength'
+            | null queue' = pathLength'
+            | weight + 1 > maxLength' = pathLength'
+            | otherwise = helper graph' queue'' pathLength'' maxLength'
+            where (pivot, weight) = head queue'
                   pathLength'' = M.insert pivot weight pathLength'
                   unexplored = filter (flip M.notMember pathLength') . neighbours $ graph' M.! pivot
                   queue'' = (tail queue') ++ map (,weight + 1) unexplored
 
-maximums :: M.Map String Int -> [String]
-maximums pathLength = map fst $ filter ((max'==) . snd) pathLength'
-    where pathLength' = M.toList pathLength
-          max' = snd $ L.maximumBy (\a b -> snd a `compare` snd b) pathLength'
-
-maxNodes :: Graph -> String -> [(String, Int)]
-maxNodes graph source = map (\k -> (k, pathLengths M.! k)) . M.keys $ M.filter (/=0) graph'
-    where pathLengths = bfs graph source
-          isNotOpened = M.filter (not . isOpen) graph
-          pathLengths' = M.filterWithKey (\k _ -> k `M.notMember` isNotOpened) pathLengths
-          graph' = M.map weight isNotOpened
+maxNodes :: Graph -> String -> Int -> [(String, Int)]
+maxNodes graph source maxLength = M.toList pathLengths'
+    where pathLengths = bfs graph source maxLength
+          isNotOpened = M.filter ((/=0) . weight) $ M.filter (not . isOpen) graph
+          pathLengths' = M.filterWithKey (\k _ -> k `M.member` isNotOpened) pathLengths
 
 updateIsOpen :: Graph -> String -> Graph 
 updateIsOpen = flip $ M.adjust (\node -> node { isOpen = True })
@@ -57,7 +53,7 @@ helper maxLength graph source pathLength
     | maxLength < pathLength = Leaf
     | null nodes = TreeNode (weight' * (maxLength - pathLength)) [Leaf]
     | otherwise = TreeNode (weight' * (maxLength - pathLength)) $ zipWith3 (helper maxLength) graphs keys pathLengths'
-    where nodes = maxNodes graph source
+    where nodes = maxNodes graph source (maxLength - pathLength)
           (keys, pathLengths) = unzip nodes
           graphs = map (updateIsOpen graph) keys
           pathLengths' = map (+pathLength) pathLengths
